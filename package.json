@@ -1,0 +1,10 @@
+{
+  "name": "moon-gate-journey",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:offline": "node scripts/build-offline.mjs",
+    "test": "node scripts/build-offline.mjs --check && node --test tests/*.test.js",
+    "serve": "python3 -m http.server 8080"
+  }
+}

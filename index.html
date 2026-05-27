@@ -1,0 +1,1672 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+      name="description"
+      content="Moon Gate Journey: learn to see Chinese classical gardens through an interactive English-language experience."
+    >
+    <title>Moon Gate Journey | 月洞门游园</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script defer src="./js/app.bundle.js"></script>
+
+    <style id="garden-final-force-css">
+      :root{
+        --garden-left-x: clamp(22px,3.2vw,54px);
+        --garden-card-top: clamp(74px,9vh,112px);
+        --garden-card-w: min(450px,34vw);
+        --garden-ink:#173d36;
+        --garden-red:#b85a52;
+        --garden-gold:#c79a4b;
+      }
+
+      .garden-kill-decor,
+      .garden-kill-decor *,
+      .garden-original-tap-hidden{
+        display:none!important;
+        visibility:hidden!important;
+        opacity:0!important;
+        pointer-events:none!important;
+      }
+
+      .garden-hide-pseudo-ring::before,
+      .garden-hide-pseudo-ring::after{
+        display:none!important;
+        content:none!important;
+        opacity:0!important;
+        visibility:hidden!important;
+      }
+
+      /* 防止误把讲解大卡片当作点击浏览按钮隐藏 */
+      .garden-principle-left.garden-original-tap-hidden{
+        display:block!important;
+        visibility:visible!important;
+        opacity:1!important;
+        pointer-events:auto!important;
+      }
+
+      #learn:not([hidden]) [class*="ring" i],
+      #learn:not([hidden]) [class*="halo" i],
+      #learn:not([hidden]) [class*="circle" i],
+      #learn:not([hidden]) [class*="arc" i],
+      #learn:not([hidden]) [class*="guide" i],
+      #learn:not([hidden]) [class*="viewfinder" i]{
+        --garden-ring-kill:1;
+      }
+
+      #learn:not([hidden]) [class*="ring" i]:not(.garden-tap-clone-final),
+      #learn:not([hidden]) [class*="halo" i]:not(.garden-tap-clone-final),
+      #learn:not([hidden]) [class*="circle" i]:not(.garden-tap-clone-final),
+      #learn:not([hidden]) [class*="arc" i]:not(.garden-tap-clone-final),
+      #learn:not([hidden]) [class*="guide" i]:not(.garden-tap-clone-final),
+      #learn:not([hidden]) [class*="viewfinder" i]:not(.garden-tap-clone-final){
+        display:none!important;
+        visibility:hidden!important;
+        opacity:0!important;
+      }
+      /* 借鉴 claude(2).html 的处理方式：只强化删除学习页背景中的横向虚线 / 引导线 */
+      #learn:not([hidden]) svg path[stroke-dasharray],
+      #learn:not([hidden]) svg line[stroke-dasharray],
+      #learn:not([hidden]) svg polyline[stroke-dasharray],
+      #learn:not([hidden]) svg path[stroke-dashoffset],
+      #learn:not([hidden]) svg line,
+      #learn:not([hidden]) svg polyline,
+      #learn:not([hidden]) hr,
+      #learn:not([hidden]) [class*="dash" i],
+      #learn:not([hidden]) [class*="dotted" i],
+      #learn:not([hidden]) [class*="dashed" i],
+      #learn:not([hidden]) [class*="guide-line" i],
+      #learn:not([hidden]) [class*="guideline" i],
+      #learn:not([hidden]) [class*="sight-line" i],
+      #learn:not([hidden]) [class*="sightline" i],
+      #learn:not([hidden]) [class*="view-line" i],
+      #learn:not([hidden]) [class*="viewline" i],
+      #learn:not([hidden]) [class*="trace-line" i],
+      #learn:not([hidden]) [class*="traceline" i],
+      #learn:not([hidden]) [class*="horizon-line" i],
+      #learn:not([hidden]) [class*="horizonline" i],
+      #learn:not([hidden]) [class*="divider-line" i],
+      #learn:not([hidden]) [class*="dividerline" i],
+      #learn:not([hidden]) [class*="path-line" i],
+      #learn:not([hidden]) [class*="connector" i]{
+        display:none!important;
+        visibility:hidden!important;
+        opacity:0!important;
+        pointer-events:none!important;
+        stroke:transparent!important;
+        stroke-width:0!important;
+      }
+
+      /* 针对 Changing Views 页面的背景细线处理；不改动卡片文字与其他元素 */
+      #learn[data-current-principle*="Changing" i] svg,
+      #learn[data-current-principle*="changing" i] svg,
+      #learn:not([hidden]) .changing-views svg path,
+      #learn:not([hidden]) .changing-views svg line,
+      #learn:not([hidden]) [data-principle*="changing" i] svg path:not([fill]):not([d*="M"][d*="C"][d*="z"]){
+        opacity:0!important;
+        stroke:transparent!important;
+      }
+
+#learn:not([hidden]) .garden-principle-left{
+        position:fixed!important;
+        left:var(--garden-left-x)!important;
+        right:auto!important;
+        top:var(--garden-card-top)!important;
+        bottom:auto!important;
+        width:var(--garden-card-w)!important;
+        max-width:var(--garden-card-w)!important;
+        max-height:calc(100vh - var(--garden-card-top) - 34px)!important;
+        transform:none!important;
+        z-index:3600!important;
+        overflow:auto!important;
+        box-sizing:border-box!important;
+      }
+
+
+
+      /* 关键修复：不再克隆/隐藏“点击浏览”按钮，直接移动原生按钮，保留原网页点击事件 */
+      #learn:not([hidden]) .garden-tap-live-fixed{
+        position:fixed!important;
+        left:auto!important;
+        right:clamp(22px,3.2vw,56px)!important;
+        bottom:clamp(22px,4vh,52px)!important;
+        top:auto!important;
+        transform:none!important;
+        z-index:99999!important;
+        display:flex!important;
+        align-items:center!important;
+        justify-content:center!important;
+        gap:10px!important;
+        min-width:150px!important;
+        max-width:min(260px,26vw)!important;
+        min-height:56px!important;
+        margin:0!important;
+        padding:12px 22px!important;
+        border-radius:999px!important;
+        box-sizing:border-box!important;
+        background:rgba(255,250,235,.96)!important;
+        border:1px solid rgba(183,90,82,.42)!important;
+        color:var(--garden-ink)!important;
+        box-shadow:0 18px 36px rgba(35,52,43,.22)!important;
+        cursor:pointer!important;
+        opacity:1!important;
+        visibility:visible!important;
+        pointer-events:auto!important;
+        transition:transform .26s ease, box-shadow .26s ease!important;
+        overflow:hidden!important;
+      }
+
+      #learn:not([hidden]) .garden-tap-live-fixed:hover{
+        transform:translateY(-5px)!important;
+        box-shadow:0 24px 46px rgba(35,52,43,.28)!important;
+      }
+
+      #learn:not([hidden]) .garden-tap-live-fixed [class*="circle" i],
+      #learn:not([hidden]) .garden-tap-live-fixed [class*="badge" i],
+      #learn:not([hidden]) .garden-tap-live-fixed [class*="icon" i]:first-child,
+      #learn:not([hidden]) .garden-tap-live-fixed > :first-child:not(:only-child){
+        display:none!important;
+      }
+
+      body > .garden-tap-clone-final{
+        position:fixed!important;
+        left:auto!important;
+        right:clamp(22px,3.2vw,56px)!important;
+        bottom:clamp(22px,4vh,52px)!important;
+        top:auto!important;
+        transform:none!important;
+        z-index:99999!important;
+        display:flex!important;
+        align-items:center!important;
+        justify-content:center!important;
+        gap:10px!important;
+        min-width:150px!important;
+        max-width:min(260px,26vw)!important;
+        min-height:56px!important;
+        margin:0!important;
+        padding:12px 22px!important;
+        border-radius:999px!important;
+        box-sizing:border-box!important;
+        background:rgba(255,250,235,.96)!important;
+        border:1px solid rgba(183,90,82,.42)!important;
+        color:var(--garden-ink)!important;
+        box-shadow:0 18px 36px rgba(35,52,43,.22)!important;
+        cursor:pointer!important;
+        transition:transform .26s ease, box-shadow .26s ease!important;
+        overflow:hidden!important;
+      }
+
+      body > .garden-tap-clone-final:hover{
+        transform:translateY(-5px)!important;
+        box-shadow:0 24px 46px rgba(35,52,43,.28)!important;
+      }
+
+      body > .garden-tap-clone-final .garden-round-badge-kill,
+      body > .garden-tap-clone-final [class*="circle" i],
+      body > .garden-tap-clone-final [class*="badge" i],
+      body > .garden-tap-clone-final [class*="icon" i]:first-child,
+      body > .garden-tap-clone-final > :first-child:not(:only-child){
+        display:none!important;
+      }
+
+      body > .garden-tap-clone-final::before{
+        content:"阅";
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        width:28px;
+        height:28px;
+        border-radius:50%;
+        background:rgba(184,90,82,.9);
+        color:#fff8e7;
+        font-size:14px;
+        line-height:1;
+        flex:0 0 auto;
+      }
+
+      #learn:not([hidden]) .garden-nav-final{
+        position:fixed!important;
+        top:clamp(8px,1.6vh,22px)!important;
+        right:clamp(14px,2.4vw,44px)!important;
+        left:auto!important;
+        bottom:auto!important;
+        z-index:4100!important;
+        display:flex!important;
+        justify-content:flex-end!important;
+        gap:10px!important;
+        max-width:min(62vw,860px)!important;
+        transform:none!important;
+      }
+
+      .garden-principle-left li,
+      .garden-principle-left p,
+      .garden-principle-left .item,
+      .garden-principle-left .point,
+      .garden-principle-left [class*="item"],
+      .garden-principle-left [class*="point"]{
+        position:relative!important;
+        border-radius:16px!important;
+        transition:transform .25s cubic-bezier(.2,.72,.22,1), box-shadow .25s ease, background .25s ease!important;
+      }
+
+      .garden-principle-left li:hover,
+      .garden-principle-left p:hover,
+      .garden-principle-left .item:hover,
+      .garden-principle-left .point:hover,
+      .garden-principle-left [class*="item"]:hover,
+      .garden-principle-left [class*="point"]:hover{
+        transform:translate3d(8px,-3px,0) scale(1.012)!important;
+        box-shadow:0 14px 30px rgba(39,57,40,.15)!important;
+        background:rgba(255,251,239,.58)!important;
+      }
+
+      .begin-challenge-garden{
+        position:relative!important;
+        display:inline-flex!important;
+        align-items:center!important;
+        justify-content:center!important;
+        min-width:220px!important;
+        padding:14px 30px!important;
+        border-radius:999px!important;
+        border:1px solid rgba(207,168,88,.88)!important;
+        color:#fff8e7!important;
+        background:radial-gradient(circle at 20% 18%,rgba(255,255,255,.28),transparent 27%),linear-gradient(135deg,#7d2924 0%,#aa3d32 45%,#5e2f26 100%)!important;
+        box-shadow:0 18px 38px rgba(82,41,31,.28), inset 0 0 0 1px rgba(255,238,181,.22)!important;
+        letter-spacing:.08em!important;
+        overflow:hidden!important;
+        transition:transform .28s ease, box-shadow .28s ease, filter .28s ease!important;
+      }
+
+      .begin-challenge-garden::before,
+      .begin-challenge-garden::after{
+        content:"◆";
+        color:rgba(255,228,160,.82);
+        font-size:.72em;
+        margin:0 10px;
+      }
+
+      .begin-challenge-garden:hover{
+        transform:translateY(-4px)!important;
+        filter:saturate(1.06)!important;
+        box-shadow:0 24px 46px rgba(82,41,31,.34), inset 0 0 0 1px rgba(255,238,181,.35)!important;
+      }
+
+      /* 四张 principle 卡片的右侧季节动效：只在画面偏右区域出现，避免遮挡左侧卡片文字 */
+      .garden-seasonal-layer{
+        position:fixed;
+        top:0;
+        right:0;
+        bottom:0;
+        left:52vw;
+        z-index:3450;
+        pointer-events:none;
+        overflow:hidden;
+        contain:layout style paint;
+      }
+
+      .garden-seasonal-piece{
+        position:absolute;
+        top:-8vh;
+        left:var(--sx,50%);
+        width:var(--size,18px);
+        height:var(--size,18px);
+        opacity:0;
+        pointer-events:none;
+        will-change:transform,opacity;
+        animation:seasonalFall var(--dur,12s) linear var(--delay,0s) infinite;
+      }
+
+      @keyframes seasonalFall{
+        0%{
+          transform:translate3d(0,-10vh,0) rotate(0deg) scale(var(--scale,1));
+          opacity:0;
+        }
+        10%{ opacity:var(--alpha,.82); }
+        86%{ opacity:var(--alpha,.82); }
+        100%{
+          transform:translate3d(var(--drift,90px),112vh,0) rotate(var(--rot,520deg)) scale(var(--scale,1));
+          opacity:0;
+        }
+      }
+
+      .garden-seasonal-piece.peach::before,
+      .garden-seasonal-piece.magnolia::before{
+        content:"";
+        position:absolute;
+        inset:0;
+        border-radius:58% 42% 62% 38% / 58% 45% 55% 42%;
+        transform:rotate(42deg);
+      }
+
+      .garden-seasonal-piece.peach::before{
+        background:
+          radial-gradient(circle at 28% 24%, rgba(255,255,255,.88) 0 10%, transparent 25%),
+          radial-gradient(ellipse at 60% 70%, #e78194 0%, #f6b4c3 45%, #ffd8df 100%);
+        box-shadow:0 0 10px rgba(231,129,148,.34);
+      }
+
+      .garden-seasonal-piece.peach.flower{
+        width:22px;
+        height:22px;
+      }
+
+      .garden-seasonal-piece.peach.flower::before{
+        background:
+          radial-gradient(circle at 50% 50%, #d77b58 0 10%, transparent 12%),
+          radial-gradient(ellipse at 50% 18%, #ffd4dd 0 26%, transparent 27%),
+          radial-gradient(ellipse at 82% 43%, #f0a0b4 0 25%, transparent 26%),
+          radial-gradient(ellipse at 68% 80%, #f6b3c1 0 25%, transparent 26%),
+          radial-gradient(ellipse at 32% 80%, #ffd9e2 0 25%, transparent 26%),
+          radial-gradient(ellipse at 18% 43%, #ed9daf 0 25%, transparent 26%);
+        border-radius:50%;
+        box-shadow:0 0 12px rgba(235,142,160,.36);
+      }
+
+      .garden-seasonal-piece.magnolia::before{
+        background:
+          radial-gradient(circle at 35% 20%, rgba(255,255,255,.95) 0 16%, transparent 32%),
+          linear-gradient(135deg, #fffdf5 0%, #f4ead8 45%, #d9c7aa 100%);
+        border-radius:65% 35% 72% 28% / 70% 42% 58% 30%;
+        box-shadow:0 0 12px rgba(255,255,245,.48);
+      }
+
+      .garden-seasonal-piece.maple{
+        filter:drop-shadow(0 3px 6px rgba(119,74,18,.28));
+      }
+
+      .garden-seasonal-piece.maple::before{
+        content:"";
+        position:absolute;
+        left:8%;
+        top:0;
+        width:86%;
+        height:92%;
+        background:
+          radial-gradient(circle at 42% 20%, rgba(255,248,191,.95) 0 7%, transparent 15%),
+          linear-gradient(145deg, #ffe27a 0%, #f2bc33 38%, #d89316 68%, #a9690b 100%);
+        clip-path:polygon(50% 0%, 59% 24%, 84% 9%, 74% 34%, 100% 39%, 75% 53%, 88% 78%, 59% 67%, 51% 100%, 42% 67%, 12% 78%, 25% 53%, 0% 39%, 26% 34%, 16% 9%, 41% 24%);
+        transform:rotate(-8deg);
+        opacity:.96;
+      }
+
+      .garden-seasonal-piece.maple::after{
+        content:"";
+        position:absolute;
+        left:49%;
+        top:62%;
+        width:9%;
+        height:42%;
+        border-radius:999px;
+        background:linear-gradient(180deg,#c17b10,#8f5608);
+        transform:rotate(-14deg);
+        transform-origin:top center;
+        opacity:.86;
+      }
+
+      .garden-seasonal-piece.snow{
+        color:rgba(255,255,255,.96);
+        font-size:var(--size,18px);
+        line-height:1;
+        text-shadow:0 0 12px rgba(255,255,255,.95), 0 2px 8px rgba(157,185,190,.35);
+        animation-name:snowFall;
+      }
+
+      .garden-seasonal-piece.snow::before{
+        content:"❄";
+        display:block;
+        font-family:"Times New Roman", "Noto Serif", serif;
+        font-weight:400;
+        transform:rotate(0deg);
+      }
+
+      @keyframes snowFall{
+        0%{
+          transform:translate3d(0,-10vh,0) rotate(0deg) scale(var(--scale,1));
+          opacity:0;
+        }
+        12%{ opacity:var(--alpha,.86); }
+        88%{ opacity:var(--alpha,.86); }
+        100%{
+          transform:translate3d(var(--drift,60px),112vh,0) rotate(var(--rot,260deg)) scale(var(--scale,1));
+          opacity:0;
+        }
+      }
+
+
+
+      /* 第 6–10 题扩展问答：只在 challenge 完成后叠加显示，不改变原网页结构 */
+      .garden-extension-quiz{
+        position:fixed;
+        inset:0;
+        z-index:100000;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        background:
+          radial-gradient(circle at 18% 14%, rgba(199,154,75,.18), transparent 34%),
+          radial-gradient(circle at 84% 78%, rgba(90,138,114,.16), transparent 38%),
+          rgba(247,241,222,.72);
+        backdrop-filter:blur(8px) saturate(1.03);
+        -webkit-backdrop-filter:blur(8px) saturate(1.03);
+        animation:gardenQuizFade .45s ease both;
+      }
+
+      @keyframes gardenQuizFade{
+        from{opacity:0;}
+        to{opacity:1;}
+      }
+
+      .garden-extension-panel{
+        position:relative;
+        width:min(880px,88vw);
+        max-height:88vh;
+        overflow:auto;
+        padding:38px 42px 34px;
+        box-sizing:border-box;
+        border-radius:24px;
+        color:#173d36;
+        background:
+          linear-gradient(145deg, rgba(255,252,239,.98), rgba(244,235,210,.96)),
+          repeating-linear-gradient(0deg, rgba(199,154,75,.045) 0 1px, transparent 1px 34px),
+          repeating-linear-gradient(90deg, rgba(199,154,75,.04) 0 1px, transparent 1px 34px);
+        border:1px solid rgba(183,90,82,.22);
+        box-shadow:
+          0 34px 82px rgba(35,52,43,.28),
+          inset 0 0 0 1px rgba(255,255,255,.55),
+          inset 0 0 70px rgba(199,154,75,.08);
+        animation:gardenQuizRise .58s cubic-bezier(.2,.72,.22,1) both;
+      }
+
+      @keyframes gardenQuizRise{
+        from{opacity:0; transform:translateY(22px) scale(.985);}
+        to{opacity:1; transform:translateY(0) scale(1);}
+      }
+
+      .garden-extension-panel::before,
+      .garden-extension-panel::after{
+        content:"";
+        position:absolute;
+        width:64px;
+        height:64px;
+        pointer-events:none;
+        opacity:.72;
+      }
+
+      .garden-extension-panel::before{
+        left:14px;
+        top:14px;
+        border-left:2px solid rgba(199,154,75,.68);
+        border-top:2px solid rgba(199,154,75,.68);
+        border-radius:16px 0 0 0;
+      }
+
+      .garden-extension-panel::after{
+        right:14px;
+        bottom:14px;
+        border-right:2px solid rgba(199,154,75,.68);
+        border-bottom:2px solid rgba(199,154,75,.68);
+        border-radius:0 0 16px 0;
+      }
+
+      .garden-extension-kicker{
+        color:#b85a52;
+        letter-spacing:.18em;
+        text-transform:uppercase;
+        font-size:12px;
+        margin-bottom:10px;
+      }
+
+      .garden-extension-head{
+        display:flex;
+        align-items:flex-start;
+        justify-content:space-between;
+        gap:24px;
+        margin-bottom:18px;
+      }
+
+      .garden-extension-title{
+        margin:0;
+        font-family:Georgia, "Times New Roman", "STKaiti", serif;
+        font-size:clamp(28px,3.2vw,42px);
+        line-height:1.08;
+        color:#173d36;
+      }
+
+      .garden-extension-count{
+        min-width:84px;
+        padding:9px 12px;
+        border-radius:999px;
+        text-align:center;
+        color:#8a2a22;
+        background:rgba(255,250,235,.72);
+        border:1px solid rgba(199,154,75,.36);
+        box-shadow:0 8px 18px rgba(90,62,28,.08);
+      }
+
+      .garden-extension-question{
+        margin:18px 0 20px;
+        padding:18px 20px;
+        border-radius:18px;
+        background:rgba(255,255,255,.48);
+        border-left:4px solid rgba(184,90,82,.72);
+        font-size:18px;
+        line-height:1.55;
+        box-shadow:0 14px 34px rgba(35,52,43,.08);
+      }
+
+      .garden-extension-options{
+        display:grid;
+        gap:12px;
+      }
+
+      .garden-extension-option{
+        width:100%;
+        padding:14px 16px 14px 52px;
+        position:relative;
+        text-align:left;
+        border-radius:18px;
+        border:1px solid rgba(199,154,75,.34);
+        background:linear-gradient(135deg, rgba(255,255,255,.82), rgba(247,241,222,.62));
+        color:#173d36;
+        font:16px/1.45 Georgia, "Times New Roman", serif;
+        cursor:pointer;
+        transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease, background .25s ease;
+      }
+
+      .garden-extension-option::before{
+        content:attr(data-letter);
+        position:absolute;
+        left:15px;
+        top:50%;
+        width:26px;
+        height:26px;
+        transform:translateY(-50%);
+        display:grid;
+        place-items:center;
+        border-radius:50%;
+        color:#b85a52;
+        background:rgba(255,250,235,.96);
+        border:1px solid rgba(199,154,75,.42);
+      }
+
+      .garden-extension-option:hover:not(:disabled){
+        transform:translateX(7px) translateY(-2px);
+        border-color:rgba(199,154,75,.78);
+        box-shadow:0 16px 28px rgba(35,52,43,.13);
+        background:linear-gradient(135deg, rgba(255,255,255,.94), rgba(247,237,210,.78));
+      }
+
+      .garden-extension-option.correct{
+        border-color:rgba(77,128,87,.92);
+        background:linear-gradient(135deg, rgba(222,241,218,.92), rgba(246,251,237,.84));
+      }
+
+      .garden-extension-option.correct::after{
+        content:"✓";
+        position:absolute;
+        right:18px;
+        top:50%;
+        transform:translateY(-50%);
+        color:#3f7c4c;
+        font-size:22px;
+      }
+
+      .garden-extension-option.wrong{
+        border-color:rgba(184,90,82,.92);
+        background:linear-gradient(135deg, rgba(251,226,218,.92), rgba(255,245,236,.84));
+      }
+
+      .garden-extension-option.wrong::after{
+        content:"×";
+        position:absolute;
+        right:18px;
+        top:50%;
+        transform:translateY(-50%);
+        color:#9b342a;
+        font-size:24px;
+      }
+
+      .garden-extension-feedback{
+        min-height:72px;
+        margin-top:18px;
+        padding:16px 18px;
+        border-radius:18px;
+        background:rgba(255,250,235,.74);
+        border:1px solid rgba(199,154,75,.24);
+        line-height:1.55;
+        opacity:0;
+        transform:translateY(8px);
+        transition:opacity .25s ease, transform .25s ease;
+      }
+
+      .garden-extension-feedback.show{
+        opacity:1;
+        transform:translateY(0);
+      }
+
+      .garden-extension-feedback strong{
+        display:inline-block;
+        margin-right:8px;
+        color:#b85a52;
+        font-family:"STKaiti", "KaiTi", Georgia, serif;
+        font-size:20px;
+      }
+
+      .garden-extension-actions{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:16px;
+        margin-top:22px;
+      }
+
+      .garden-extension-progress{
+        flex:1;
+        height:5px;
+        border-radius:999px;
+        overflow:hidden;
+        background:rgba(199,154,75,.18);
+      }
+
+      .garden-extension-progress span{
+        display:block;
+        height:100%;
+        width:0%;
+        border-radius:inherit;
+        background:linear-gradient(90deg,#c79a4b,#b85a52);
+        transition:width .35s ease;
+      }
+
+      .garden-extension-next,
+      .garden-extension-close{
+        border:0;
+        border-radius:999px;
+        padding:12px 24px;
+        color:#fff8e7;
+        background:linear-gradient(135deg,#7d2924,#b85a52 52%,#7b3d28);
+        box-shadow:0 14px 26px rgba(82,41,31,.24), inset 0 0 0 1px rgba(255,238,181,.28);
+        cursor:pointer;
+        letter-spacing:.06em;
+        transition:transform .25s ease, box-shadow .25s ease;
+      }
+
+      .garden-extension-next:hover,
+      .garden-extension-close:hover{
+        transform:translateY(-3px);
+        box-shadow:0 20px 34px rgba(82,41,31,.3);
+      }
+
+      .garden-extension-toast{
+        position:fixed;
+        left:50%;
+        bottom:34px;
+        transform:translateX(-50%) translateY(16px);
+        z-index:100001;
+        padding:12px 20px;
+        border-radius:999px;
+        color:#173d36;
+        background:rgba(255,250,235,.96);
+        border:1px solid rgba(199,154,75,.34);
+        box-shadow:0 14px 34px rgba(35,52,43,.2);
+        opacity:0;
+        pointer-events:none;
+        transition:opacity .22s ease, transform .22s ease;
+      }
+
+      .garden-extension-toast.show{
+        opacity:1;
+        transform:translateX(-50%) translateY(0);
+      }
+
+      @media (max-width:760px){
+        .garden-extension-panel{padding:30px 22px 26px; width:92vw;}
+        .garden-extension-head{display:block;}
+        .garden-extension-count{display:inline-block; margin-top:12px;}
+        .garden-extension-question{font-size:16px;}
+        .garden-extension-option{font-size:15px;}
+      }
+
+
+
+      /* 保护原生 Challenge 入口：不改变位置，只避免被上一页 Tap 克隆按钮或装饰层遮挡 */
+      .begin-challenge-garden{
+        z-index:100010!important;
+        visibility:visible!important;
+        opacity:1!important;
+        pointer-events:auto!important;
+      }
+
+    
+
+      /* 本轮美化：保留原生点击事件，只提升“点击浏览 / Tap to learn”小按钮的中式园林审美 */
+      #learn:not([hidden]) .garden-tap-live-fixed{
+        min-width:clamp(168px, 15vw, 230px)!important;
+        min-height:60px!important;
+        padding:13px 24px 13px 22px!important;
+        border-radius:999px!important;
+        border:1px solid rgba(196,137,68,.72)!important;
+        background:
+          radial-gradient(circle at 18% 18%, rgba(255,255,255,.72) 0 10%, transparent 32%),
+          linear-gradient(135deg, rgba(255,251,239,.98) 0%, rgba(243,229,194,.97) 54%, rgba(232,209,159,.96) 100%)!important;
+        color:#173d36!important;
+        box-shadow:
+          0 18px 38px rgba(35,52,43,.24),
+          0 0 0 4px rgba(255,250,235,.25),
+          inset 0 0 0 1px rgba(255,255,255,.62),
+          inset 0 -10px 26px rgba(199,154,75,.10)!important;
+        letter-spacing:.04em!important;
+        font-weight:650!important;
+        isolation:isolate!important;
+      }
+
+      #learn:not([hidden]) .garden-tap-live-fixed::before{
+        content:"阅"!important;
+        display:inline-flex!important;
+        align-items:center!important;
+        justify-content:center!important;
+        width:32px!important;
+        height:32px!important;
+        margin-right:10px!important;
+        border-radius:10px!important;
+        flex:0 0 auto!important;
+        color:#fff8e7!important;
+        font-family:"STKaiti","KaiTi","Songti SC",serif!important;
+        font-size:17px!important;
+        line-height:1!important;
+        background:linear-gradient(135deg,#b9473c 0%,#7e2922 100%)!important;
+        box-shadow:0 6px 14px rgba(126,41,34,.28), inset 0 0 0 1px rgba(255,232,172,.34)!important;
+        transform:rotate(-5deg)!important;
+      }
+
+      #learn:not([hidden]) .garden-tap-live-fixed::after{
+        content:""!important;
+        position:absolute!important;
+        inset:0!important;
+        border-radius:inherit!important;
+        pointer-events:none!important;
+        background:
+          linear-gradient(115deg, transparent 0 32%, rgba(255,255,255,.48) 44%, transparent 56% 100%),
+          radial-gradient(circle at 86% 28%, rgba(199,154,75,.18), transparent 28%)!important;
+        transform:translateX(-115%)!important;
+        animation:tapSilkShimmer 3.6s ease-in-out infinite!important;
+        z-index:-1!important;
+      }
+
+      #learn:not([hidden]) .garden-tap-live-fixed:hover{
+        transform:translateY(-6px) scale(1.018)!important;
+        border-color:rgba(184,90,82,.62)!important;
+        box-shadow:
+          0 26px 48px rgba(35,52,43,.30),
+          0 0 0 6px rgba(199,154,75,.14),
+          inset 0 0 0 1px rgba(255,255,255,.72)!important;
+      }
+
+      @keyframes tapSilkShimmer{
+        0%,58%{ transform:translateX(-115%); opacity:0; }
+        68%{ opacity:.86; }
+        100%{ transform:translateX(115%); opacity:0; }
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div class="paper-grain" aria-hidden="true"></div>
+
+    <main id="app" class="journey" data-phase="arrival">
+      <section id="arrival" class="screen screen--arrival" aria-labelledby="journeyTitle"></section>
+      <section id="learn" class="screen screen--learn" aria-label="Learning walk" hidden></section>
+      <section id="challenge" class="screen screen--challenge" aria-label="Complete the garden challenge" hidden></section>
+      <section id="result" class="screen screen--result" aria-live="polite" hidden></section>
+    </main>
+
+    <div id="audioDock" class="audio-dock" hidden></div>
+    <div id="announcement" class="sr-only" aria-live="polite"></div>
+
+    <script id="garden-final-force-js">
+      window.addEventListener('DOMContentLoaded', () => {
+        'use strict';
+
+        const PRINCIPLE_RE = /(Framed\s+Vastness|A\s+Walkable\s+Painting|Changing\s+Views|Made\s+to\s+Feel\s+Natural|Four\s+Principles|principle|框景|借景|多样性|自然|对比|平衡)/i;
+        const TAP_RE = /(Tap\s*to\s*learn|点击阅览)/i;
+
+        const AUDIO_LIBRARY = Object.freeze({
+          'Framed Vastness': './assets/audio/narration/Framed Vastness.mp3',
+          'A Walkable Painting': './assets/audio/narration/A Walkable Painting.mp3',
+          'Changing Views': './assets/audio/narration/Changing Views.mp3',
+          'Made to Feel Natural': './assets/audio/narration/Made to Feel Natural.mp3'
+        });
+
+        const AUDIO_TITLES = Object.freeze(Object.keys(AUDIO_LIBRARY));
+        let activeAudio = null;
+        const audioCache = new Map();
+
+        function rect(el){
+          try {
+            return el.getBoundingClientRect();
+          } catch(e) {
+            return {width:0,height:0,left:0,top:0};
+          }
+        }
+
+        function visible(el){
+          const b = rect(el);
+          const cs = getComputedStyle(el);
+          return b.width > 3 && b.height > 3 && cs.display !== 'none' && cs.visibility !== 'hidden';
+        }
+
+        function kill(el){
+          if(!el || el.classList?.contains('garden-principle-left') || el.classList?.contains('garden-tap-clone-final')) return;
+          el.classList.add('garden-kill-decor');
+          try {
+            el.style.setProperty('display','none','important');
+          } catch(e) {}
+        }
+
+        function pale(s){
+          return /transparent|white|#fff|#ffff|#f[0-9a-f]{2,6}|#e[0-9a-f]{2,6}|rgba?\(\s*2[3-5][0-9]/i.test(String(s || ''));
+        }
+
+        function svgBBox(el){
+          const b = rect(el);
+          if(b.width || b.height) return b;
+          try {
+            const x = el.getBBox();
+            return {width:x.width,height:x.height,left:x.x,top:x.y};
+          } catch(e) {
+            return b;
+          }
+        }
+
+        function removeRingsAndLines(){
+          const learn = document.getElementById('learn');
+          if(!learn || learn.hidden) return;
+
+          /* 删除伪元素形成的圆环 */
+          learn.querySelectorAll('*').forEach(el => {
+            if(el.closest('.garden-principle-left') || el.classList.contains('garden-tap-clone-final')) return;
+
+            const b = rect(el);
+            if(b.width < 180 || b.height < 120 || b.width > innerWidth * .95 || b.height > innerHeight * .98) return;
+
+            ['::before','::after'].forEach(pseudo => {
+              const ps = getComputedStyle(el, pseudo);
+              if(!ps || ps.display === 'none' || ps.visibility === 'hidden') return;
+
+              const w = parseFloat(ps.width) || 0;
+              const h = parseFloat(ps.height) || 0;
+              const bw = Math.max(
+                parseFloat(ps.borderTopWidth) || 0,
+                parseFloat(ps.borderRightWidth) || 0,
+                parseFloat(ps.borderBottomWidth) || 0,
+                parseFloat(ps.borderLeftWidth) || 0
+              );
+
+              const radius = String(ps.borderRadius || '');
+              const bg = String(ps.backgroundColor || '');
+              const bc = String(ps.borderColor || '');
+              const shadow = String(ps.boxShadow || '');
+
+              const large = (w > 220 && h > 180) || (w === 0 && h === 0 && b.width > 300 && b.height > 240);
+              const round = /50%|999|px/.test(radius) && (parseFloat(radius) || 999) > 40;
+
+              if(large && round && (bw >= 2 || pale(bg) || pale(bc) || pale(shadow))){
+                el.classList.add('garden-hide-pseudo-ring');
+              }
+            });
+          });
+
+          /* 删除 SVG 大圆环、圆弧与普通 SVG 引导线 */
+          learn.querySelectorAll('svg circle, svg ellipse, svg path, svg line, svg polyline, svg rect').forEach(el => {
+            if(el.closest('.garden-principle-left')) return;
+
+            const b = svgBBox(el);
+            const cs = getComputedStyle(el);
+            const stroke = `${el.getAttribute('stroke') || ''} ${cs.stroke || ''}`;
+            const fill = `${el.getAttribute('fill') || ''} ${cs.fill || ''}`;
+            const sw = parseFloat(el.getAttribute('stroke-width') || cs.strokeWidth || '0') || 0;
+            const opacity = parseFloat(el.getAttribute('opacity') || cs.opacity || '1') || 1;
+            const dash = `${el.getAttribute('stroke-dasharray') || ''} ${cs.strokeDasharray || ''}`;
+
+            const bigRingOrArc = (
+              b.width > 240 &&
+              b.height > 180 &&
+              (sw >= 3 || opacity < .95) &&
+              (pale(stroke) || opacity < .95) &&
+              (/none|transparent/i.test(fill) || sw >= 3)
+            );
+
+            const thinGuideLine = (
+              b.width > Math.min(360, window.innerWidth * 0.25) &&
+              b.height <= 32 &&
+              (pale(stroke) || pale(fill)) &&
+              (/dash|dotted|dashed|,/.test(dash) || sw <= 4 || /path|line|polyline/i.test(String(el.tagName)))
+            );
+
+            if(bigRingOrArc || thinGuideLine){
+              kill(el);
+              const svg = el.closest('svg');
+              if(svg && svg.querySelectorAll('path,circle,ellipse,line,polyline,rect').length <= 6){
+                kill(svg);
+              }
+            }
+          });
+
+          /* 删除 CSS div / span 形成的大圆环 */
+          learn.querySelectorAll('div,span,i,b,figure,aside').forEach(el => {
+            if(el.closest('.garden-principle-left') || el.classList.contains('garden-tap-clone-final')) return;
+
+            const b = rect(el);
+            if(b.width < 180 || b.height < 130 || b.width > innerWidth * .92 || b.height > innerHeight * .96) return;
+
+            const cs = getComputedStyle(el);
+            const text = (el.textContent || '').trim();
+
+            const radius = Math.max(
+              parseFloat(cs.borderTopLeftRadius) || 0,
+              parseFloat(cs.borderTopRightRadius) || 0,
+              parseFloat(cs.borderBottomLeftRadius) || 0,
+              parseFloat(cs.borderBottomRightRadius) || 0
+            );
+
+            const border = Math.max(
+              parseFloat(cs.borderTopWidth) || 0,
+              parseFloat(cs.borderRightWidth) || 0,
+              parseFloat(cs.borderBottomWidth) || 0,
+              parseFloat(cs.borderLeftWidth) || 0
+            );
+
+            const named = /ring|halo|circle|arc|guide|viewfinder|portal|圆|环|圈/i.test(`${el.className || ''} ${el.id || ''}`);
+            const round = /50%/.test(cs.borderRadius) || radius > Math.min(b.width,b.height) * .25;
+
+            if(text.length < 6 && ((named && b.width > 200) || (round && border >= 2 && pale(`${cs.borderColor} ${cs.backgroundColor} ${cs.boxShadow}`)))){
+              kill(el);
+            }
+          });
+
+          /* 强制删除第三页 Changing Views 以及其他页面背景中的横向细线 / 虚线 / 引导线 */
+          learn.querySelectorAll('div,span,i,b,hr,svg,svg line,svg path,svg polyline,svg rect').forEach(el => {
+            if(el.closest('.garden-principle-left')) return;
+            if(el.classList?.contains('garden-tap-clone-final')) return;
+
+            const b = rect(el);
+            const cs = getComputedStyle(el);
+
+            const name = String(el.tagName || '').toLowerCase();
+            const cls = `${el.className || ''} ${el.id || ''}`;
+
+            const stroke = `${el.getAttribute?.('stroke') || ''} ${cs.stroke || ''}`;
+            const fill = `${el.getAttribute?.('fill') || ''} ${cs.fill || ''}`;
+            const dash = `${el.getAttribute?.('stroke-dasharray') || ''} ${cs.strokeDasharray || ''}`;
+
+            const borderTop = `${cs.borderTopStyle} ${cs.borderTopColor} ${cs.borderTopWidth}`;
+            const borderBottom = `${cs.borderBottomStyle} ${cs.borderBottomColor} ${cs.borderBottomWidth}`;
+            const bg = `${cs.backgroundColor} ${cs.backgroundImage}`;
+
+            const text = (el.textContent || '').trim();
+
+            const veryWide = b.width > Math.min(420, window.innerWidth * 0.28);
+            const veryThin = b.height <= 18;
+
+            const nearlyHorizontalSvg =
+              /^(path|line|polyline|rect)$/i.test(name) &&
+              b.width > Math.min(360, window.innerWidth * 0.25) &&
+              b.height <= 32;
+
+            const looksLikeGuideLine =
+              /line|guide|dash|rule|path|view|trace|horizon|divider|sight/i.test(cls) ||
+              /dash|dotted|dashed|,/.test(dash) ||
+              /(dashed|dotted)/i.test(borderTop + borderBottom);
+
+            const paleLine =
+              pale(stroke) ||
+              pale(fill) ||
+              pale(borderTop) ||
+              pale(borderBottom) ||
+              pale(bg) ||
+              /rgba?\(\s*255|rgba?\(\s*24[0-9]|rgba?\(\s*23[0-9]|#fff|#eee|#e9|#f5/i.test(
+                `${stroke} ${fill} ${borderTop} ${borderBottom} ${bg}`
+              );
+
+            const emptyOrDecorative = text.length === 0 || text.length < 3;
+
+            if (
+              emptyOrDecorative &&
+              paleLine &&
+              (
+                (veryWide && veryThin) ||
+                nearlyHorizontalSvg ||
+                looksLikeGuideLine
+              )
+            ) {
+              kill(el);
+
+              const parentSvg = el.closest?.('svg');
+              if(parentSvg && !parentSvg.closest('.garden-principle-left')){
+                const sb = rect(parentSvg);
+                if(sb.width > Math.min(420, window.innerWidth * 0.28) && sb.height <= 80){
+                  kill(parentSvg);
+                }
+              }
+            }
+          });
+        }
+
+
+          /* 借鉴 claude(2).html 的第三页细线处理：终极删除横向细线 / 虚线 / 引导线（包括 Changing Views 那条） */
+          learn.querySelectorAll('div,span,i,b,hr,svg,svg line,svg path,svg polyline,svg rect,svg g').forEach(el => {
+            if(el.closest('.garden-principle-left')) return;
+            if(el.classList?.contains('garden-tap-clone-final')) return;
+            if(el.classList?.contains('garden-seasonal-layer') || el.closest('.garden-seasonal-layer')) return;
+
+            const b = rect(el);
+            const cs = getComputedStyle(el);
+            const name = String(el.tagName || '').toLowerCase();
+            const cls = `${el.className?.baseVal || el.className || ''} ${el.id || ''}`;
+            const stroke = `${el.getAttribute?.('stroke') || ''} ${cs.stroke || ''}`;
+            const fill = `${el.getAttribute?.('fill') || ''} ${cs.fill || ''}`;
+            const dash = `${el.getAttribute?.('stroke-dasharray') || ''} ${cs.strokeDasharray || ''}`;
+            const borderTop = `${cs.borderTopStyle} ${cs.borderTopColor} ${cs.borderTopWidth}`;
+            const borderBottom = `${cs.borderBottomStyle} ${cs.borderBottomColor} ${cs.borderBottomWidth}`;
+            const bg = `${cs.backgroundColor} ${cs.backgroundImage}`;
+            const text = (el.textContent || '').trim();
+
+            const veryWide = b.width > Math.min(300, window.innerWidth * 0.2);
+            const veryThin = b.height <= 24;
+
+            const nearlyHorizontalSvg =
+              /^(path|line|polyline|rect)$/i.test(name) &&
+              b.width > Math.min(280, window.innerWidth * 0.18) &&
+              b.height <= 36;
+
+            const looksLikeGuideLine =
+              /line|guide|dash|rule|path|view|trace|horizon|divider|sight|connector|stroke/i.test(cls) ||
+              /dash|dotted|dashed|,/.test(dash) ||
+              /(dashed|dotted)/i.test(borderTop + borderBottom);
+
+            const paleLine =
+              pale(stroke) || pale(fill) || pale(borderTop) || pale(borderBottom) || pale(bg) ||
+              /rgba?\(\s*255|rgba?\(\s*24[0-9]|rgba?\(\s*23[0-9]|rgba?\(\s*22[0-9]|rgba?\(\s*21[0-9]|rgba?\(\s*20[0-9]|#fff|#eee|#e9|#f5|#dcd|#cdc/i.test(
+                `${stroke} ${fill} ${borderTop} ${borderBottom} ${bg}`
+              );
+
+            const emptyOrDecorative = text.length === 0 || text.length < 3;
+
+            if (
+              emptyOrDecorative &&
+              (paleLine || /dash|dotted|dashed/i.test(borderTop + borderBottom + dash)) &&
+              ((veryWide && veryThin) || nearlyHorizontalSvg || looksLikeGuideLine)
+            ) {
+              kill(el);
+              const parentSvg = el.closest?.('svg');
+              if(parentSvg && !parentSvg.closest('.garden-principle-left')){
+                const sb = rect(parentSvg);
+                if(sb.width > Math.min(280, window.innerWidth * 0.18) && sb.height <= 100){
+                  kill(parentSvg);
+                }
+              }
+            }
+          });
+
+        function forceCardsLeft(){
+          const learn = document.getElementById('learn');
+          if(!learn || learn.hidden) return;
+
+          learn.querySelectorAll('article,aside,[role="dialog"],[class*="card"],[class*="panel"],[class*="drawer"],[class*="modal"],[data-card],[data-panel]').forEach(el => {
+            if(!visible(el)) return;
+
+            const b = rect(el);
+            if(b.width < 220 || b.height < 150) return;
+
+            const t = (el.textContent || '').slice(0,1600);
+            if(PRINCIPLE_RE.test(t) && !TAP_RE.test(t)){
+              el.classList.add('garden-principle-left');
+            }
+          });
+        }
+
+        function innermostTapElement(){
+          const learn = document.getElementById('learn');
+          if(!learn || learn.hidden) return null;
+
+          /* 只允许选中真正的“点击浏览 / Tap to learn”小按钮。
+             关键修复：不能把包含 principle 标题和大段讲解文字的大卡片当作 Tap 按钮隐藏，
+             否则点击浏览后左侧讲解大卡片会消失。 */
+          const all = Array.from(learn.querySelectorAll('button,a,[role="button"],div,span')).filter(el => {
+            if(!visible(el)) return false;
+            const txt = (el.textContent || '').replace(/\s+/g,' ').trim();
+            if(!TAP_RE.test(txt)) return false;
+            if(txt.length > 140 && PRINCIPLE_RE.test(txt)) return false;
+            return true;
+          });
+
+          let best = null;
+          let bestScore = Infinity;
+
+          for(const el of all){
+            const b = rect(el);
+            const txt = (el.textContent || '').replace(/\s+/g,' ').trim();
+            if(b.width < 54 || b.width > 380 || b.height < 24 || b.height > 170) continue;
+            if(txt.length > 180) continue;
+            if(PRINCIPLE_RE.test(txt) && txt.length > 80) continue;
+
+            const tag = String(el.tagName || '').toLowerCase();
+            const clickableBonus = /^(button|a)$/i.test(tag) || el.getAttribute('role') === 'button' ? -90000 : 0;
+            const childrenWithText = Array.from(el.children || []).filter(c => TAP_RE.test((c.textContent || '').trim())).length;
+            const principlePenalty = PRINCIPLE_RE.test(txt) ? 250000 : 0;
+            const score = (b.width * b.height) + (childrenWithText * 50000) + principlePenalty + clickableBonus;
+
+            if(score < bestScore){
+              best = el;
+              bestScore = score;
+            }
+          }
+
+          if(!best) return null;
+
+          let target = best;
+          for(let i = 0; i < 5 && target.parentElement && target.parentElement !== learn; i++){
+            const p = target.parentElement;
+            const b = rect(p);
+            const txt = (p.textContent || '').replace(/\s+/g,' ').trim();
+
+            /* 只向上扩展到小按钮容器，不扩展到讲解大卡片。 */
+            if(
+              TAP_RE.test(txt) &&
+              txt.length <= 160 &&
+              !PRINCIPLE_RE.test(txt) &&
+              b.width >= 70 && b.width <= 380 &&
+              b.height >= 34 && b.height <= 170
+            ){
+              target = p;
+            } else {
+              break;
+            }
+          }
+
+          return target;
+        }
+
+        function positionTapButtonRightBottom(){
+          const learn = document.getElementById('learn');
+
+          /* 这一版不再克隆，也不再隐藏原按钮。
+             原因：原网页的点击逻辑绑定在原生“点击浏览”节点上；
+             克隆按钮再触发 original.click() 容易丢失上下文，导致点击后讲解卡片打不开。
+             因此只给原生小按钮加定位 class，保留原始事件。 */
+          document.querySelectorAll('.garden-tap-clone-final').forEach(e => e.remove());
+          document.querySelectorAll('.garden-original-tap-hidden').forEach(e => e.classList.remove('garden-original-tap-hidden'));
+          document.querySelectorAll('.garden-tap-live-fixed').forEach(e => e.classList.remove('garden-tap-live-fixed'));
+
+          if(!learn || learn.hidden) return;
+
+          const tap = innermostTapElement();
+          if(!tap) return;
+
+          /* 如果命中了内部 span，优先使用最近的可点击元素；但绝不向上扩展到大卡片。 */
+          let target = tap;
+          const clickable = tap.closest?.('button,a,[role="button"]');
+          if(clickable && learn.contains(clickable)){
+            const b = rect(clickable);
+            const txt = (clickable.textContent || '').replace(/\s+/g,' ').trim();
+            if(TAP_RE.test(txt) && txt.length <= 180 && b.width <= 420 && b.height <= 190 && !PRINCIPLE_RE.test(txt)){
+              target = clickable;
+            }
+          }
+
+          target.classList.remove('garden-original-tap-hidden','garden-kill-decor','garden-principle-left');
+          target.classList.add('garden-tap-live-fixed');
+          target.setAttribute('data-garden-tap-polished', 'true');
+          target.style.removeProperty('display');
+          target.style.removeProperty('visibility');
+          target.style.removeProperty('opacity');
+          target.style.removeProperty('pointer-events');
+        }
+
+        function pinNavigation(){
+          const learn = document.getElementById('learn');
+          if(!learn || learn.hidden) return;
+
+          learn.querySelectorAll('nav,[role="navigation"],.nav,.navbar,.site-nav,.top-nav,.phase-nav,.journey-nav,.screen-nav,.chapter-nav,.garden-nav').forEach(nav => {
+            const n = nav.querySelectorAll('button,a').length;
+            if(n >= 3 && n <= 8){
+              nav.classList.add('garden-nav-final');
+            }
+          });
+        }
+
+        function restyleBeginChallenge(){
+          document.querySelectorAll('button,a,[role="button"]').forEach(el => {
+            if(/Begin\s+Challenge/i.test(`${el.textContent || ''} ${el.getAttribute('aria-label') || ''}`)){
+              el.classList.add('begin-challenge-garden');
+            }
+          });
+        }
+
+        function playAudio(key){
+          const src = AUDIO_LIBRARY[key];
+          if(!src) return;
+
+          if(!audioCache.has(src)){
+            const a = new Audio(src);
+            a.preload = 'auto';
+            audioCache.set(src, a);
+          }
+
+          const a = audioCache.get(src);
+
+          if(activeAudio && activeAudio !== a){
+            activeAudio.pause();
+            activeAudio.currentTime = 0;
+          }
+
+          activeAudio = a;
+          a.currentTime = 0;
+          a.play().catch(() => {});
+        }
+
+        function exactAudioTitleFromText(text){
+          const normalized = String(text || '').replace(/\s+/g, ' ').trim();
+          const hits = AUDIO_TITLES.filter(title => normalized.includes(title));
+          return hits.length === 1 ? hits[0] : null;
+        }
+
+        function audioKey(el){
+          let node = el;
+
+          for(let i = 0; node && i < 10; i++, node = node.parentElement){
+            const key = exactAudioTitleFromText(
+              `${node.dataset?.audioKey || ''} ${node.getAttribute?.('aria-label') || ''} ${node.textContent || ''}`
+            );
+
+            if(key) return key;
+          }
+
+          const visibleCards = Array.from(document.querySelectorAll('.garden-principle-left, article, aside, [role="dialog"], [class*="card"], [class*="panel"]'))
+            .filter(elm => visible(elm));
+
+          for(const card of visibleCards){
+            const key = exactAudioTitleFromText(card.textContent || '');
+            if(key) return key;
+          }
+
+          return null;
+        }
+
+        function replaceSpeech(){
+          document.querySelectorAll('button,a,[role="button"]').forEach(el => {
+            if(el.dataset.localAudioPatched === 'true') return;
+
+            const t = `${el.textContent || ''} ${el.getAttribute('aria-label') || ''} ${el.className || ''}`;
+            if(!/speak|listen|voice|read\s*aloud|audio|朗读|播放/i.test(t)) return;
+
+            el.dataset.localAudioPatched = 'true';
+
+            el.addEventListener('click', ev => {
+              ev.preventDefault();
+              ev.stopPropagation();
+
+              if(window.speechSynthesis){
+                window.speechSynthesis.cancel();
+              }
+
+              const key = audioKey(el);
+              if(key){
+                playAudio(key);
+              }
+            }, true);
+          });
+        }
+
+
+        const SEASONAL_SCENES = Object.freeze({
+          'Framed Vastness': { type:'peach', count:22 },
+          'A Walkable Painting': { type:'magnolia', count:20 },
+          'Changing Views': { type:'maple', count:18 },
+          'Made to Feel Natural': { type:'snow', count:30 }
+        });
+
+        let currentSeasonalTitle = '';
+
+        function currentPrincipleTitle(){
+          const learn = document.getElementById('learn');
+          if(!learn || learn.hidden) return '';
+
+          const visibleCards = Array.from(document.querySelectorAll('.garden-principle-left, article, aside, [role="dialog"], [class*="card"], [class*="panel"]'))
+            .filter(elm => visible(elm));
+
+          for(const card of visibleCards){
+            const text = (card.textContent || '').replace(/\s+/g, ' ');
+            for(const title of Object.keys(SEASONAL_SCENES)){
+              if(text.includes(title)) return title;
+            }
+          }
+
+          const allText = (learn.textContent || '').replace(/\s+/g, ' ');
+          const titles = Object.keys(SEASONAL_SCENES).filter(title => allText.includes(title));
+          return titles.length === 1 ? titles[0] : '';
+        }
+
+        function ensureSeasonalLayer(){
+          let layer = document.querySelector('.garden-seasonal-layer');
+          if(!layer){
+            layer = document.createElement('div');
+            layer.className = 'garden-seasonal-layer';
+            layer.setAttribute('aria-hidden','true');
+            document.body.appendChild(layer);
+          }
+          return layer;
+        }
+
+        function rebuildSeasonalLayer(title){
+          const layer = ensureSeasonalLayer();
+          layer.innerHTML = '';
+
+          const scene = SEASONAL_SCENES[title];
+          if(!scene) return;
+
+          for(let i = 0; i < scene.count; i++){
+            const piece = document.createElement('span');
+            piece.className = `garden-seasonal-piece ${scene.type}`;
+
+            if(scene.type === 'peach' && i % 5 === 0){
+              piece.classList.add('flower');
+            }
+
+            const sizeBase = scene.type === 'snow' ? 10 : scene.type === 'maple' ? 18 : 12;
+            const size = sizeBase + Math.random() * (scene.type === 'snow' ? 10 : 14);
+
+            piece.style.setProperty('--sx', (8 + Math.random() * 86) + '%');
+            piece.style.setProperty('--size', size.toFixed(1) + 'px');
+            piece.style.setProperty('--drift', ((Math.random() * 180) - 60).toFixed(1) + 'px');
+            piece.style.setProperty('--rot', ((scene.type === 'snow' ? 180 : 420) + Math.random() * 420).toFixed(0) + 'deg');
+            piece.style.setProperty('--dur', (scene.type === 'snow' ? 10 + Math.random() * 10 : 9 + Math.random() * 9).toFixed(2) + 's');
+            piece.style.setProperty('--delay', (-Math.random() * 12).toFixed(2) + 's');
+            piece.style.setProperty('--scale', (0.72 + Math.random() * 0.72).toFixed(2));
+            piece.style.setProperty('--alpha', (0.52 + Math.random() * 0.34).toFixed(2));
+
+            layer.appendChild(piece);
+          }
+        }
+
+        function updateSeasonalEffects(){
+          const learn = document.getElementById('learn');
+          if(!learn || learn.hidden){
+            currentSeasonalTitle = '';
+            document.querySelectorAll('.garden-seasonal-layer').forEach(layer => layer.remove());
+            return;
+          }
+
+          const title = currentPrincipleTitle();
+          if(!title){
+            currentSeasonalTitle = '';
+            document.querySelectorAll('.garden-seasonal-layer').forEach(layer => layer.remove());
+            return;
+          }
+
+          if(title !== currentSeasonalTitle){
+            currentSeasonalTitle = title;
+            rebuildSeasonalLayer(title);
+          }
+        }
+
+
+
+        const GARDEN_EXTENSION_QUESTIONS = Object.freeze([
+          {
+            number:6,
+            question:"What is the primary artistic purpose of the principle 'Alternation of density and spacing' in garden composition?",
+            options:[
+              "To maintain equal distance between structural elements.",
+              "To create visual rhythm by contrasting crowded and open areas.",
+              "To maximize the land use for additional building space.",
+              "To separate different functional zones within the landscape."
+            ],
+            correct:1,
+            explain:"This technique produces visual rhythm — dense clusters of bamboo or rocks alternate with open water or empty courtyards, creating a poetic breath in the garden design."
+          },
+          {
+            number:7,
+            question:"In classical garden aesthetics, how is 'the art of empty space' effectively utilized?",
+            options:[
+              "As leftover, underutilized land designated for future pavilions.",
+              "As structured storage coordinates hidden behind decorative walls.",
+              "As an intentional vacuum that invites imagination and mental relief.",
+              "As a temporary construction zone left unfinished by designers."
+            ],
+            correct:2,
+            explain:"Borrowed from traditional ink painting, white space or emptiness (such as a blank wall, still water, or open sky) serves as a powerful element that allows the viewer's mind to wander and breathe."
+          },
+          {
+            number:8,
+            question:"Why do rockeries hold such an essential spiritual status in classical Chinese gardens?",
+            options:[
+              "They function as highly affordable and durable materials for basic walls.",
+              "They represent sacred peaks and embody the natural spirit in miniature.",
+              "They serve exclusively as functional barriers to block neighbor views.",
+              "They were legally mandated decorations required by ancient authorities."
+            ],
+            correct:1,
+            explain:"Rockeries are not mere decorations; they represent the grand mountains of classical mythology, shrinking the vastness of nature down to an intimate, human scale."
+          },
+          {
+            number:9,
+            question:"Which philosophical framework most deeply shapes the structural design of these traditional gardens?",
+            options:[
+              "The geometric symmetry and rational perspectives of European Renaissance.",
+              "The integration of Daoist nature, Confucian order, and Buddhist stillness.",
+              "The absolute simplicity and industrial functionality of modern minimalism.",
+              "The mathematical proportions derived from ancient architectural engineering."
+            ],
+            correct:1,
+            explain:"Classical gardens are philosophy brought to life: Daoist harmony with nature, Confucian social and moral order, and Chan Buddhist meditative contemplation converge in every view."
+          },
+          {
+            number:10,
+            question:"What does the concept 'Beauty in all four seasons' require from a garden designer?",
+            options:[
+              "Restricting public access to the garden during specific weather cycles.",
+              "Selecting flora so that every changing period reveals its own aesthetics.",
+              "Modifying the physical layout and moving large rockeries every three months.",
+              "Requiring visitors to wear historically accurate seasonal clothing styles."
+            ],
+            correct:1,
+            explain:"This concept ensures the garden is never dull. Each season has its own botanical protagonist — winter plum blossoms, spring peonies, summer lotuses, and autumn chrysanthemums."
+          }
+        ]);
+
+        let gardenAudioContext = null;
+        let gardenExtensionStarted = false;
+        let gardenLastFeedbackText = '';
+
+        function gardenSoundContext(){
+          if(!gardenAudioContext){
+            try{ gardenAudioContext = new (window.AudioContext || window.webkitAudioContext)(); }
+            catch(e){ return null; }
+          }
+          if(gardenAudioContext.state === 'suspended'){
+            gardenAudioContext.resume().catch(() => {});
+          }
+          return gardenAudioContext;
+        }
+
+        function playGardenTone(kind){
+          const ctx = gardenSoundContext();
+          if(!ctx) return;
+          const now = ctx.currentTime;
+          const freqs = kind === 'correct' ? [523.25, 659.25, 783.99] : [246.94, 196.00];
+          const type = kind === 'correct' ? 'sine' : 'triangle';
+          freqs.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, now + i * 0.09);
+            gain.gain.setValueAtTime(0.0001, now + i * 0.09);
+            gain.gain.exponentialRampToValueAtTime(kind === 'correct' ? 0.16 : 0.20, now + i * 0.09 + 0.025);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.09 + (kind === 'correct' ? 0.52 : 0.42));
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(now + i * 0.09);
+            osc.stop(now + i * 0.09 + 0.62);
+          });
+        }
+
+        function showGardenToast(text, kind){
+          let toast = document.querySelector('.garden-extension-toast');
+          if(!toast){
+            toast = document.createElement('div');
+            toast.className = 'garden-extension-toast';
+            document.body.appendChild(toast);
+          }
+          toast.textContent = text;
+          toast.dataset.kind = kind;
+          toast.classList.add('show');
+          clearTimeout(toast._hideTimer);
+          toast._hideTimer = setTimeout(() => toast.classList.remove('show'), 1300);
+        }
+
+        function checkNativeChallengeFeedback(){
+          const challenge = document.getElementById('challenge');
+          if(!challenge || challenge.hidden) return;
+          const txt = (challenge.textContent || '').replace(/\s+/g,' ').trim();
+          if(!txt || txt === gardenLastFeedbackText) return;
+          gardenLastFeedbackText = txt;
+          const tail = txt.slice(-280);
+          if(/correct|well done|great|excellent|right|✓|答对|正确|恭喜/i.test(tail)){
+            playGardenTone('correct');
+            showGardenToast('Correct · 回答正确', 'correct');
+          }else if(/incorrect|wrong|try again|not quite|×|✕|错误|不正确|再试/i.test(tail)){
+            playGardenTone('wrong');
+            showGardenToast('Incorrect · 回答错误', 'wrong');
+          }
+        }
+
+        function renderGardenExtensionQuestion(index){
+          const q = GARDEN_EXTENSION_QUESTIONS[index];
+          const overlay = document.querySelector('.garden-extension-quiz');
+          if(!overlay || !q) return;
+          const letters = ['A','B','C','D'];
+          overlay.querySelector('.garden-extension-kicker').textContent = 'Garden Knowledge · Questions 1–5';
+          overlay.querySelector('.garden-extension-title').textContent = '园林知识';
+          overlay.querySelector('.garden-extension-count').textContent = `${index + 1} / ${GARDEN_EXTENSION_QUESTIONS.length}`;
+          overlay.querySelector('.garden-extension-question').textContent = q.question;
+          const options = overlay.querySelector('.garden-extension-options');
+          options.innerHTML = q.options.map((opt,i) => `<button class="garden-extension-option" type="button" data-index="${i}" data-letter="${letters[i]}">${letters[i]}. ${opt}</button>`).join('');
+          overlay.querySelector('.garden-extension-feedback').className = 'garden-extension-feedback';
+          overlay.querySelector('.garden-extension-feedback').innerHTML = '';
+          overlay.querySelector('.garden-extension-next').textContent = index === GARDEN_EXTENSION_QUESTIONS.length - 1 ? 'Finish' : 'Next';
+          overlay.querySelector('.garden-extension-next').disabled = true;
+          overlay.querySelector('.garden-extension-progress span').style.width = `${((index + 1) / GARDEN_EXTENSION_QUESTIONS.length) * 100}%`;
+        }
+
+        function startGardenExtensionQuiz(){
+          if(gardenExtensionStarted || document.querySelector('.garden-extension-quiz')) return;
+          gardenExtensionStarted = true;
+          const overlay = document.createElement('div');
+          overlay.className = 'garden-extension-quiz';
+          overlay.innerHTML = `
+            <section class="garden-extension-panel" role="dialog" aria-modal="true" aria-label="Garden Knowledge Questions 1 to 5">
+              <div class="garden-extension-head">
+                <div>
+                  <div class="garden-extension-kicker"></div>
+                  <h2 class="garden-extension-title"></h2>
+                </div>
+                <div class="garden-extension-count"></div>
+              </div>
+              <div class="garden-extension-question"></div>
+              <div class="garden-extension-options"></div>
+              <div class="garden-extension-feedback" aria-live="polite"></div>
+              <div class="garden-extension-actions">
+                <div class="garden-extension-progress" aria-hidden="true"><span></span></div>
+                <button class="garden-extension-next" type="button" disabled>Next</button>
+              </div>
+            </section>`;
+          document.body.appendChild(overlay);
+          let index = 0;
+          renderGardenExtensionQuestion(index);
+          overlay.addEventListener('click', ev => {
+            const option = ev.target.closest('.garden-extension-option');
+            const next = ev.target.closest('.garden-extension-next');
+            if(option){
+              const q = GARDEN_EXTENSION_QUESTIONS[index];
+              const chosen = Number(option.dataset.index);
+              overlay.querySelectorAll('.garden-extension-option').forEach(btn => btn.disabled = true);
+              overlay.querySelectorAll('.garden-extension-option')[q.correct]?.classList.add('correct');
+              const ok = chosen === q.correct;
+              if(!ok) option.classList.add('wrong');
+              const feedback = overlay.querySelector('.garden-extension-feedback');
+              feedback.classList.add('show');
+              feedback.innerHTML = `<strong>${ok ? '正确' : '错误'}</strong>${q.explain}`;
+              playGardenTone(ok ? 'correct' : 'wrong');
+              showGardenToast(ok ? 'Correct · 回答正确' : 'Incorrect · 回答错误', ok ? 'correct' : 'wrong');
+              overlay.querySelector('.garden-extension-next').disabled = false;
+            }
+            if(next && !next.disabled){
+              if(index < GARDEN_EXTENSION_QUESTIONS.length - 1){
+                index += 1;
+                renderGardenExtensionQuestion(index);
+              }else{
+                overlay.querySelector('.garden-extension-panel').innerHTML = `
+                  <div class="garden-extension-kicker">Garden Knowledge Completed</div>
+                  <h2 class="garden-extension-title">园林知识完成</h2>
+                  <div class="garden-extension-question">You have completed Questions 1–5. The garden is not only seen, but read through rhythm, emptiness, stone, philosophy, and the four seasons.</div>
+                  <div class="garden-extension-actions" style="justify-content:flex-end"><button class="garden-extension-close" type="button">Close</button></div>`;
+                playGardenTone('correct');
+              }
+            }
+            if(ev.target.closest('.garden-extension-close')){
+              overlay.remove();
+            }
+          });
+        }
+
+        function maybeStartExtensionAfterNativeChallenge(){
+          if(gardenExtensionStarted) return;
+          const result = document.getElementById('result');
+          const challenge = document.getElementById('challenge');
+          const resultVisible = result && !result.hidden && visible(result);
+          const challengeText = challenge ? (challenge.textContent || '') : '';
+          const resultText = result ? (result.textContent || '') : '';
+          if(resultVisible || /complete|finished|score|result|恭喜|完成|得分/i.test(challengeText + ' ' + resultText)){
+            setTimeout(startGardenExtensionQuiz, 450);
+          }
+        }
+
+        let pending = false;
+
+        function patch(){
+          pending = false;
+          forceCardsLeft();
+          removeRingsAndLines();
+          positionTapButtonRightBottom();
+          pinNavigation();
+          restyleBeginChallenge();
+          replaceSpeech();
+          updateSeasonalEffects();
+          checkNativeChallengeFeedback();
+          maybeStartExtensionAfterNativeChallenge();
+        }
+
+        function schedule(){
+          if(pending) return;
+          pending = true;
+          requestAnimationFrame(patch);
+        }
+
+        patch();
+
+        [80,180,360,700,1200,1800,2600,3600].forEach(t => setTimeout(schedule,t));
+
+        document.addEventListener('click', () => setTimeout(schedule,70), true);
+        document.addEventListener('pointerup', () => setTimeout(schedule,70), true);
+        document.addEventListener('click', ev => { if(ev.target.closest('#challenge')) setTimeout(checkNativeChallengeFeedback,160); }, true);
+        window.addEventListener('resize', schedule);
+
+        new MutationObserver(schedule).observe(document.body,{
+          childList:true,
+          subtree:true
+        });
+      });
+    </script>
+  </body>
+</html>
